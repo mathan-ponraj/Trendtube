@@ -1,83 +1,79 @@
-# TrendTube | YouTube Trending Data Pipeline
+<div align="center">
+
+# TrendTube
+
+### YouTube Trending Data Pipeline
 
 **From raw YouTube data to structured, analytics-ready information.**
 
-TrendTube is a Python-based data engineering project that collects trending video data from the YouTube Data API v3, transforms raw JSON responses, validates records, and loads structured data into PostgreSQL.
-
-The goal is to build a practical ETL pipeline that organizes trending video information across regions and creates a foundation for future data analysis and visualization.
-
 <p>
-  <img src="https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python">
-  <img src="https://img.shields.io/badge/YouTube%20Data%20API-FF0000?style=flat-square&logo=youtube&logoColor=white" alt="YouTube Data API">
-  <img src="https://img.shields.io/badge/ETL-Data%20Engineering-245A73?style=flat-square" alt="ETL">
-  <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL">
-  <img src="https://img.shields.io/badge/Git-GitHub-181717?style=flat-square&logo=github&logoColor=white" alt="GitHub">
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" />
+  <img src="https://img.shields.io/badge/ETL-245A73?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" />
+  <img src="https://img.shields.io/badge/YouTube_API-FF0000?style=for-the-badge&logo=youtube&logoColor=white" />
 </p>
 
----
+<br/>
 
-## Project Overview
+<a href="https://github.com/mathan-ponraj/Trending_YouTube_Data_Pipeline">
+  <img src="https://img.shields.io/badge/VIEW_SOURCE_CODE-7C3AED?style=for-the-badge&logo=github&logoColor=white" />
+</a>
 
-Trending YouTube videos contain useful information about views, likes, comments, publication dates, and regional popularity. However, raw API responses need to be processed and organized before they can be used effectively for analysis.
+<br/><br/>
 
-I built TrendTube to explore this process through a practical data engineering workflow, from API extraction to relational database storage.
+*A Python-based ETL pipeline for collecting, transforming, validating, and storing YouTube trending data.*
 
-### Project Objectives
-
-* Collect trending video information from multiple regions.
-* Transform raw JSON responses into structured records.
-* Validate data before loading it into the database.
-* Design relational tables for organized data storage.
-* Prepare the foundation for SQL analytics and dashboard development.
+</div>
 
 ---
 
-## Pipeline Architecture
+## About the Project
 
-```text
-             YouTube Data API v3
-                      |
-                      v
-               Data Extraction
-                      |
-                      v
-               Raw JSON Data
-                      |
-                      v
-             Data Transformation
-                      |
-                      v
-               Data Validation
-                      |
-                      v
-                 PostgreSQL
-                      |
-                      v
-               SQL Analytics
-                      |
-                      v
-             Power BI Dashboard
-                  (Planned)
-```
+TrendTube is a Python-based data engineering project that collects trending video information using the YouTube Data API v3 and transforms raw JSON responses into structured PostgreSQL records.
+
+The project explores how raw API data can be converted into organized, analytics-ready information through a practical ETL workflow.
 
 ## Key Features
 
-| Feature                  | Description                                                     |
-| ------------------------ | --------------------------------------------------------------- |
-| API Integration          | Retrieves trending video information using YouTube Data API v3. |
-| Regional Collection      | Supports data collection for configured regions.                |
-| JSON Processing          | Works with raw API responses before database loading.           |
-| Data Transformation      | Converts API data into structured records.                      |
-| Data Validation          | Includes a dedicated validation module.                         |
-| Relational Data Modeling | Organizes data into dimension and fact tables.                  |
-| PostgreSQL Integration   | Uses Python to connect to and load data into PostgreSQL.        |
-| Secure Configuration     | Uses environment variables for API and database credentials.    |
+* **API Integration:** Extract trending video information using YouTube Data API v3.
+* **Regional Data Collection:** Collect trending information across configured regions.
+* **Data Transformation:** Convert raw JSON responses into structured records.
+* **Data Validation:** Validate records before database loading.
+* **Relational Data Modeling:** Organize information using dimension and fact tables.
+* **PostgreSQL Integration:** Store structured data in a relational database.
+* **Secure Configuration:** Manage API keys and database credentials using environment variables.
 
----
+## ETL Pipeline Architecture
+
+```text
+       YouTube Data API v3
+                |
+                v
+        Data Extraction
+                |
+                v
+           Raw JSON
+                |
+                v
+       Data Transformation
+                |
+                v
+         Data Validation
+                |
+                v
+           PostgreSQL
+                |
+                v
+          SQL Analytics
+                |
+                v
+        Power BI Dashboard
+             (Planned)
+```
 
 ## Database Design
 
-The project uses PostgreSQL to organize video information and trending observations into four tables.
+The project uses a dimensional data model with four PostgreSQL tables.
 
 | Table           | Purpose                             |
 | --------------- | ----------------------------------- |
@@ -86,35 +82,33 @@ The project uses PostgreSQL to organize video information and trending observati
 | `dim_date`      | Stores date-related information.    |
 | `fact_trending` | Stores trending video observations. |
 
-This structure provides a foundation for querying video performance across regions and dates.
-
-### Potential Analytical Questions
-
-* Which videos receive the highest number of views?
-* How does engagement differ between regions?
-* Which videos receive more likes relative to their views?
-* How does trending activity vary across regions?
-* Which content categories attract the most attention?
-
-SQL analysis and Power BI reporting are planned enhancements.
-
----
+This structure provides a foundation for analyzing video performance across different regions and dates.
 
 ## Technology Stack
 
-| Category             | Technology                           |
-| -------------------- | ------------------------------------ |
-| Programming Language | Python                               |
-| Data Source          | YouTube Data API v3                  |
-| Data Format          | JSON                                 |
-| ETL                  | Python                               |
-| Database             | PostgreSQL                           |
-| Database Driver      | Psycopg                              |
-| Configuration        | Environment Variables, python-dotenv |
-| Version Control      | Git, GitHub                          |
-| Visualization        | Power BI — Planned                   |
+| Category         | Technologies        |
+| ---------------- | ------------------- |
+| Programming      | Python              |
+| Data Source      | YouTube Data API v3 |
+| Data Format      | JSON                |
+| Data Engineering | ETL                 |
+| Database         | PostgreSQL          |
+| Database Driver  | Psycopg             |
+| Configuration    | python-dotenv       |
+| Version Control  | Git, GitHub         |
+| Visualization    | Power BI (Planned)  |
 
----
+## Engineering Challenges & Solutions
+
+| Challenge                         | Approach                                                                                              |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Extracting external data          | Integrated YouTube Data API v3.                                                                       |
+| Processing unstructured responses | Implemented JSON transformation logic.                                                                |
+| Maintaining data quality          | Developed a dedicated validation module.                                                              |
+| Organizing relational data        | Designed dimension and fact tables.                                                                   |
+| Database connectivity             | Implemented PostgreSQL connectivity using Python and Psycopg.                                         |
+| Managing sensitive credentials    | Used environment variables and `.env` configuration.                                                  |
+| Maintaining modularity            | Separated extraction, transformation, validation, loading, and orchestration into individual modules. |
 
 ## Project Structure
 
@@ -122,40 +116,28 @@ SQL analysis and Power BI reporting are planned enhancements.
 Trending_YouTube_Data_Pipeline/
 |
 |-- config/
-|   `-- config.py              # API and project configuration
+|   `-- config.py
 |
 |-- sql/
-|   `-- schema.sql             # PostgreSQL table definitions
+|   `-- schema.sql
 |
 |-- src/
-|   |-- database.py            # PostgreSQL connection
-|   |-- extract.py             # YouTube API data extraction
-|   |-- transform.py           # Data transformation
-|   |-- validate.py            # Data validation
-|   |-- load.py                # Database loading
-|   `-- pipeline.py             # Pipeline orchestration module
+|   |-- database.py
+|   |-- extract.py
+|   |-- transform.py
+|   |-- validate.py
+|   |-- load.py
+|   `-- pipeline.py
 |
-|-- data/                      # Local raw data; excluded from Git
-|
-|-- main.py                    # Application entry point
-|-- requirements.txt           # Python dependencies
-|-- .gitignore                 # Files excluded from version control
-|-- .env                       # Local credentials; not committed
-`-- README.md                  # Project documentation
+|-- data/
+|-- main.py
+|-- requirements.txt
+|-- .gitignore
+|-- .env
+`-- README.md
 ```
 
----
-
 ## Getting Started
-
-### Prerequisites
-
-Before running the project, make sure you have:
-
-* Python installed
-* PostgreSQL installed and running
-* A YouTube Data API v3 API key
-* Git installed
 
 ### 1. Clone the Repository
 
@@ -170,7 +152,7 @@ cd Trending_YouTube_Data_Pipeline
 python -m venv venv
 ```
 
-Activate the environment in Windows PowerShell:
+Activate in Windows PowerShell:
 
 ```powershell
 .\venv\Scripts\Activate.ps1
@@ -184,7 +166,7 @@ pip install -r requirements.txt
 
 ### 4. Configure Environment Variables
 
-Create a `.env` file in the project root:
+Create a `.env` file:
 
 ```env
 YT_API_KEY=your_youtube_api_key
@@ -197,62 +179,82 @@ DB_USER=postgres
 DB_PASSWORD=your_postgresql_password
 ```
 
-Replace the example values with your actual API key and database credentials.
-
-**Security note:** Never commit your `.env` file, API keys, or database passwords to GitHub.
-
 ### 5. Set Up PostgreSQL
 
-Create a PostgreSQL database named `youtube_trending`.
-
-Apply the database schema using:
+Create a database named `youtube_trending` and apply the schema:
 
 ```bash
 psql -U postgres -d youtube_trending -f sql/schema.sql
 ```
 
-Make sure PostgreSQL is running and your `.env` settings match your database configuration.
-
-> **Execution note:** The pipeline entry point and orchestration should be completed and tested before running the entire workflow end to end.
-
----
+**Note:** Complete and verify the pipeline orchestration before running the entire workflow end to end.
 
 ## Development Roadmap
 
-* [x] YouTube Data API integration module
-* [x] Data transformation module
-* [x] PostgreSQL connection and loading modules
-* [x] Relational database schema
-* [ ] Verify end-to-end pipeline execution
-* [ ] Develop analytical SQL queries
-* [ ] Build a Power BI dashboard
-* [ ] Add scheduled data refreshes
-* [ ] Explore historical trending patterns
+* [x] YouTube Data API integration.
+* [x] Data transformation module.
+* [x] PostgreSQL connection and loading modules.
+* [x] Relational database schema.
+* [ ] Verify end-to-end pipeline execution.
+* [ ] Develop analytical SQL queries.
+* [ ] Build Power BI dashboards.
+* [ ] Implement scheduled data refreshes.
+* [ ] Explore historical trending patterns.
+
+## Skills Demonstrated
+
+* Python Programming
+* API Integration
+* ETL Pipeline Development
+* Data Extraction and Transformation
+* JSON Processing
+* Data Validation
+* PostgreSQL
+* Relational Database Design
+* Environment Configuration
+* Git & GitHub
+
+## Future Enhancements
+
+* Automate pipeline execution using Apache Airflow.
+* Build interactive Power BI dashboards.
+* Implement historical trend analysis.
+* Add incremental data loading.
+* Explore cloud-based data storage.
+* Introduce automated data quality checks.
+
+## Project Links
+
+<div align="center">
+
+<a href="https://github.com/mathan-ponraj/Trending_YouTube_Data_Pipeline">
+  <img src="https://img.shields.io/badge/GITHUB_REPOSITORY-7C3AED?style=for-the-badge&logo=github&logoColor=white" />
+</a>
+
+<a href="https://www.linkedin.com/in/mathan03/">
+  <img src="https://img.shields.io/badge/LINKEDIN-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" />
+</a>
+
+</div>
 
 ---
 
-## What This Project Demonstrates
+## Developer
 
-Through TrendTube, I'm developing practical experience in:
+<div align="center">
 
-* Python-based data processing
-* REST API integration
-* ETL pipeline design
-* JSON data handling
-* Relational database modeling
-* PostgreSQL connectivity
-* Environment-based configuration
-* Git and GitHub version control
+### Mathan Ponraj
 
-The project gives me an opportunity to work with real-world API data and understand how data moves from its original source into a structured format that can support analytics.
+**M.E. Computer Science | Python | Data Science | Data Engineering**
+
+*Building practical data solutions through continuous learning and hands-on development.*
+
+</div>
 
 ---
 
-## Author
+<div align="center">
 
-**Mathan Ponraj**
+**From API extraction to analytics-ready data. Built with Python and PostgreSQL.**
 
-Computer Science Engineer | Data Science | Data Engineering | Python
-
-* GitHub: https://github.com/mathan-ponraj
-* LinkedIn: https://linkedin.com/in/mathan03
+</div>
