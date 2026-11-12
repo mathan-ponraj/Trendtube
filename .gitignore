@@ -1,0 +1,23 @@
+# Environment variables and credentials (keep the *.example templates)
+.env
+.env.*
+!.env.example
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+
+# Raw ETL data (JSON snapshots live here)
+data/
+
+# Node / frontend build output
+node_modules/
+dist/
+.vercel/
+
+# IDE / OS
+.vscode/
+.DS_Store
+Thumbs.db
