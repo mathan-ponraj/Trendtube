@@ -1,261 +1,219 @@
-
-# TrendTube - Global YouTube Creator Intelligence Platform
-
-Python ETL (YouTube Data API v3 -> PostgreSQL star schema) plus a read-only analytics
-dashboard (FastAPI + React/TypeScript/ECharts).
-
-```
-trendtube/
-  main.py, config/, src/, sql/     ETL + schema (unchanged logic, see notes)
-  backend/                         FastAPI read-only API
-  frontend/                        React + Vite + Tailwind + ECharts dashboard
-  render.yaml                      Render blueprint for the API
-```
-
-## 1. Database
-
-```bash
-createdb youtube_trending
-psql -U postgres -d youtube_trending -f sql/schema.sql
-```
-
-**Existing database?** Do NOT re-run schema.sql. Run `sql/migrations/001_unique_fact_snapshot.sql`
-step by step instead: it checks for duplicates before creating the unique index that the loader's
-`ON CONFLICT (video_key, region_key, fetched_at)` requires. Without that index the fact-table
-load fails with "no unique or exclusion constraint matching the ON CONFLICT specification".
-`sql/diagnostics.sql` contains read-only health checks.
-
-## 2. ETL
-
-```bash
-python -m venv venv && .\venv\Scripts\Activate.ps1      # Windows PowerShell
-pip install -r requirements.txt
-cp .env.example .env                                    # then fill in real values
-python main.py                  # extract + transform + load
-python main.py --skip-extract   # re-load existing raw files only
-```
-
-## 3. Backend (http://localhost:8000, docs at /docs)
-
-```bash
-cd backend
-python -m venv venv && .\venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
-```
-Reads `backend/.env` or the project-root `.env`. Check `GET /api/health`.
-
-Endpoints: `/api/health`, `/api/continents`, `/api/overview`, `/api/regions`, `/api/videos`,
-`/api/categories`, `/api/insights` (continent filter: `?continent=Asia`).
-All queries are parameterised and the DB connection is read-only.
-
-## 4. Frontend (http://localhost:5173)
-
-```bash
-cd frontend
-npm install
-npm run dev          # /api is proxied to localhost:8000
-npm run build        # type-check + production build
-```
-
-## 5. Deploy
-
-**Database**: a hosted PostgreSQL (Render, Neon or Supabase). Your local DB is not reachable from
-Render; copy it with `pg_dump` / `psql` (or `pg_restore`) and keep the same schema.
-
-**Backend (Render)**: New > Blueprint (uses `render.yaml`) or a Web Service with root directory `backend`.
-Set `DATABASE_URL` (with `?sslmode=require` if your host needs it) and
-`CORS_ORIGINS=https://<your-vercel-domain>`. Verify `https://<api>/api/health`.
-
-**Frontend (Vercel)**: import the GitHub repo, set Root Directory to `frontend`, framework Vite.
-Set `VITE_API_BASE_URL=https://<your-render-api>` (no trailing slash), then redeploy.
-
-## Data definitions
-
-* Latest snapshot: each region's own `MAX(fetched_at)`; regions are not assumed to share a timestamp.
-* Combined views = sum of recorded view counts (not views gained during collection).
-* Like-to-view ratio = likes / views x 100 over videos with a visible like count (hidden likes are stored as 0).
-* Category names come from the official YouTube category list; unknown IDs show as "Category <id>".
-* Coverage = the 9 configured countries (IN, JP, GB, DE, US, CA, BR, ZA, AU). Antarctica shows "Data unavailable".
-* No growth/trend-over-time figures are shown: they need multiple snapshots.
-
-## Notes on this package
-
-* `src/database.py` was recreated (original not available). Keep yours if it exposes `get_connection()`.
-* `src/validate.py` and `src/pipeline.py` were not available and are not included.
-* `.gitignore` no longer ignores `*.json`/`*.csv` globally (that would hide `package.json`); raw data stays ignored via `data/`.
-
-Author: Mathan Ponraj
-=======
 <div align="center">
 
-# TrendTube
+# 🌍 TrendTube
 
-### YouTube Trending Data Pipeline
+### Global YouTube Creator Intelligence Platform
 
-**From raw YouTube data to structured, analytics-ready information.**
+**Discover what's trending across the world. Turn video trends into content opportunities.**
 
 <p>
   <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" />
-  <img src="https://img.shields.io/badge/ETL-245A73?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" />
+  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" />
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" />
   <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" />
   <img src="https://img.shields.io/badge/YouTube_API-FF0000?style=for-the-badge&logo=youtube&logoColor=white" />
 </p>
 
 <br/>
 
-<a href="https://github.com/mathan-ponraj/Trending_YouTube_Data_Pipeline">
+<a href="https://github.com/mathan-ponraj/Trendtube">
   <img src="https://img.shields.io/badge/VIEW_SOURCE_CODE-7C3AED?style=for-the-badge&logo=github&logoColor=white" />
 </a>
 
 <br/><br/>
 
-*A Python-based ETL pipeline for collecting, transforming, validating, and storing YouTube trending data.*
+*An end-to-end data engineering and analytics platform that collects global YouTube trending data, transforms it into structured PostgreSQL records, and presents actionable insights through an interactive dashboard.*
 
 </div>
 
 ---
 
-## About the Project
+## 📌 About the Project
 
-TrendTube is a Python-based data engineering project that collects trending video information using the YouTube Data API v3 and transforms raw JSON responses into structured PostgreSQL records.
+TrendTube is a Global YouTube Creator Intelligence Platform designed to help content creators understand trending video patterns across different geographical regions.
 
-The project explores how raw API data can be converted into organized, analytics-ready information through a practical ETL workflow.
+The application integrates the YouTube Data API v3 with a Python-based ETL pipeline to collect, transform, validate, and store trending video information in a PostgreSQL star schema.
 
-## Key Features
+A FastAPI backend exposes analytical data through REST APIs, while a React and TypeScript frontend presents the information through an interactive analytics dashboard.
 
-* **API Integration:** Extract trending video information using YouTube Data API v3.
-* **Regional Data Collection:** Collect trending information across configured regions.
-* **Data Transformation:** Convert raw JSON responses into structured records.
-* **Data Validation:** Validate records before database loading.
-* **Relational Data Modeling:** Organize information using dimension and fact tables.
-* **PostgreSQL Integration:** Store structured data in a relational database.
-* **Secure Configuration:** Manage API keys and database credentials using environment variables.
+The platform helps creators explore regional trends, discover popular content categories, and identify potential content opportunities.
 
-## ETL Pipeline Architecture
+## ✨ Key Features
 
-```text
-       YouTube Data API v3
-                |
-                v
-        Data Extraction
-                |
-                v
-           Raw JSON
-                |
-                v
-       Data Transformation
-                |
-                v
-         Data Validation
-                |
-                v
-           PostgreSQL
-                |
-                v
-          SQL Analytics
-                |
-                v
-        Power BI Dashboard
-             (Planned)
-```
+- **Global Trend Monitoring:** Explore YouTube trending content across seven continents.
+- **Regional Analytics:** Analyze trending videos across nine configured countries.
+- **Interactive Dashboard:** Explore global trending information through a clean analytics interface.
+- **Video Intelligence:** Examine video titles, channels, views, likes, and engagement metrics.
+- **Category Analysis:** Understand popular content categories across different regions.
+- **Regional Comparison:** Compare trending content across geographical locations.
+- **Automated ETL Pipeline:** Extract, transform, validate, and load YouTube data.
+- **Star Schema Database:** Organize analytical data using dimension and fact tables.
+- **REST API Integration:** Deliver structured analytical data through FastAPI endpoints.
 
-## Database Design
-
-The project uses a dimensional data model with four PostgreSQL tables.
-
-| Table           | Purpose                             |
-| --------------- | ----------------------------------- |
-| `dim_video`     | Stores video-related information.   |
-| `dim_region`    | Stores regional information.        |
-| `dim_date`      | Stores date-related information.    |
-| `fact_trending` | Stores trending video observations. |
-
-This structure provides a foundation for analyzing video performance across different regions and dates.
-
-## Technology Stack
-
-| Category         | Technologies        |
-| ---------------- | ------------------- |
-| Programming      | Python              |
-| Data Source      | YouTube Data API v3 |
-| Data Format      | JSON                |
-| Data Engineering | ETL                 |
-| Database         | PostgreSQL          |
-| Database Driver  | Psycopg             |
-| Configuration    | python-dotenv       |
-| Version Control  | Git, GitHub         |
-| Visualization    | Power BI (Planned)  |
-
-## Engineering Challenges & Solutions
-
-| Challenge                         | Approach                                                                                              |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| Extracting external data          | Integrated YouTube Data API v3.                                                                       |
-| Processing unstructured responses | Implemented JSON transformation logic.                                                                |
-| Maintaining data quality          | Developed a dedicated validation module.                                                              |
-| Organizing relational data        | Designed dimension and fact tables.                                                                   |
-| Database connectivity             | Implemented PostgreSQL connectivity using Python and Psycopg.                                         |
-| Managing sensitive credentials    | Used environment variables and `.env` configuration.                                                  |
-| Maintaining modularity            | Separated extraction, transformation, validation, loading, and orchestration into individual modules. |
-
-## Project Structure
+## 🏗️ System Architecture
 
 ```text
-Trending_YouTube_Data_Pipeline/
-|
-|-- config/
-|   `-- config.py
-|
-|-- sql/
-|   `-- schema.sql
-|
-|-- src/
-|   |-- database.py
-|   |-- extract.py
-|   |-- transform.py
-|   |-- validate.py
-|   |-- load.py
-|   `-- pipeline.py
-|
-|-- data/
-|-- main.py
-|-- requirements.txt
-|-- .gitignore
-|-- .env
-`-- README.md
+          YOUTUBE DATA API v3
+                   |
+                   v
+           PYTHON ETL PIPELINE
+                   |
+          +--------+--------+
+          |                 |
+          v                 v
+      Extraction       Transformation
+          |                 |
+          +--------+--------+
+                   |
+                   v
+             Data Validation
+                   |
+                   v
+              PostgreSQL
+              Star Schema
+                   |
+                   v
+             FASTAPI BACKEND
+             REST Endpoints
+                   |
+                   v
+             REACT FRONTEND
+             TYPESCRIPT
+                   |
+                   v
+          GLOBAL ANALYTICS
+               DASHBOARD
 ```
 
-## Getting Started
+## 🛠️ Technology Stack
+
+| Category | Technologies |
+|---|---|
+| Programming | Python |
+| Data Source | YouTube Data API v3 |
+| Data Engineering | ETL, Data Transformation |
+| Data Processing | Pandas |
+| Backend | FastAPI, REST APIs |
+| Frontend | React, TypeScript, Vite |
+| Visualization | Apache ECharts |
+| Styling | Tailwind CSS |
+| Database | PostgreSQL |
+| Database Driver | Psycopg |
+| Configuration | Python-dotenv |
+| Version Control | Git, GitHub |
+| Deployment | Render, Vercel |
+
+## 📊 Database Design
+
+TrendTube uses a PostgreSQL star schema to organize trending video information for analytical queries.
+
+| Table | Description |
+|---|---|
+| `dim_video` | Stores video metadata and descriptive information. |
+| `dim_region` | Stores geographical region information. |
+| `dim_date` | Stores date-related information. |
+| `fact_trending` | Stores trending video observations and metrics. |
+
+### Data Processing
+
+The ETL pipeline follows three major stages:
+
+**1. Extract**
+- Connects to YouTube Data API v3.
+- Retrieves trending video information.
+- Collects data from nine configured countries.
+- Stores raw API responses.
+
+**2. Transform**
+- Processes raw JSON responses.
+- Extracts relevant video attributes.
+- Normalizes records.
+- Prepares structured data for database loading.
+
+**3. Load**
+- Connects to PostgreSQL.
+- Loads dimensional and fact records.
+- Supports snapshot-based data storage.
+- Maintains structured analytical data.
+
+## 📈 Analytics & Metrics
+
+The dashboard provides insights into:
+
+- Total recorded video views.
+- Trending video distribution.
+- Regional content performance.
+- Popular video categories.
+- Video engagement metrics.
+- Regional trending comparisons.
+
+**Metric definitions:**
+
+- Combined views represent the sum of recorded video view counts.
+- Like-to-view ratio = Likes / Views × 100.
+- Latest snapshot is determined independently for each region.
+- Historical growth analysis requires multiple snapshots.
+
+## 📁 Project Structure
+
+```text
+TrendTube/
+│
+├── backend/
+│   ├── app/
+│   ├── requirements.txt
+│   └── ...
+│
+├── frontend/
+│   ├── src/
+│   ├── public/
+│   ├── package.json
+│   └── ...
+│
+├── config/
+│   └── config.py
+│
+├── src/
+│   ├── extract.py
+│   ├── transform.py
+│   ├── load.py
+│   └── database.py
+│
+├── sql/
+│   ├── schema.sql
+│   ├── diagnostics.sql
+│   └── migrations/
+│
+├── main.py
+├── requirements.txt
+├── render.yaml
+├── .env.example
+├── .gitignore
+└── README.md
+```
+
+## 🚀 Getting Started
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/mathan-ponraj/Trending_YouTube_Data_Pipeline.git
-cd Trending_YouTube_Data_Pipeline
+git clone https://github.com/mathan-ponraj/Trendtube.git
+cd Trendtube
 ```
 
-### 2. Create a Virtual Environment
-
-```bash
-python -m venv venv
-```
-
-Activate in Windows PowerShell:
+### 2. Backend & ETL Environment
 
 ```powershell
+python -m venv venv
 .\venv\Scripts\Activate.ps1
-```
 
-### 3. Install Dependencies
-
-```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configure Environment Variables
+### 3. Configure Environment Variables
 
-Create a `.env` file:
+Create a `.env` file in the project root.
 
 ```env
 YT_API_KEY=your_youtube_api_key
@@ -265,78 +223,180 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=youtube_trending
 DB_USER=postgres
-DB_PASSWORD=your_postgresql_password
+DB_PASSWORD=your_database_password
 ```
 
-### 5. Set Up PostgreSQL
+### 4. Database Setup
 
-Create a database named `youtube_trending` and apply the schema:
+Create the PostgreSQL database:
+
+```bash
+createdb youtube_trending
+```
+
+Apply the database schema:
 
 ```bash
 psql -U postgres -d youtube_trending -f sql/schema.sql
 ```
 
-**Note:** Complete and verify the pipeline orchestration before running the entire workflow end to end.
+**Note:** If you already have an existing database, check the migration instructions before applying any schema changes.
 
-## Development Roadmap
+### 5. Run the ETL Pipeline
 
-* [x] YouTube Data API integration.
-* [x] Data transformation module.
-* [x] PostgreSQL connection and loading modules.
-* [x] Relational database schema.
-* [ ] Verify end-to-end pipeline execution.
-* [ ] Develop analytical SQL queries.
-* [ ] Build Power BI dashboards.
-* [ ] Implement scheduled data refreshes.
-* [ ] Explore historical trending patterns.
+Execute the complete pipeline:
 
-## Skills Demonstrated
+```bash
+python main.py
+```
 
-* Python Programming
-* API Integration
-* ETL Pipeline Development
-* Data Extraction and Transformation
-* JSON Processing
-* Data Validation
-* PostgreSQL
-* Relational Database Design
-* Environment Configuration
-* Git & GitHub
+To reload existing raw data without extracting again:
 
-## Future Enhancements
+```bash
+python main.py --skip-extract
+```
 
-* Automate pipeline execution using Apache Airflow.
-* Build interactive Power BI dashboards.
-* Implement historical trend analysis.
-* Add incremental data loading.
-* Explore cloud-based data storage.
-* Introduce automated data quality checks.
+### 6. Start the Backend
 
-## Project Links
+```powershell
+cd backend
 
-<div align="center">
+python -m venv venv
+.\venv\Scripts\Activate.ps1
 
-<a href="https://github.com/mathan-ponraj/Trending_YouTube_Data_Pipeline">
-  <img src="https://img.shields.io/badge/GITHUB_REPOSITORY-7C3AED?style=for-the-badge&logo=github&logoColor=white" />
-</a>
+pip install -r requirements.txt
 
-<a href="https://www.linkedin.com/in/mathan03/">
-  <img src="https://img.shields.io/badge/LINKEDIN-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" />
-</a>
+uvicorn app.main:app --reload --port 8000
+```
 
-</div>
+Backend API:
 
----
+```text
+http://localhost:8000
+```
 
-## Developer
+API documentation:
+
+```text
+http://localhost:8000/docs
+```
+
+### 7. Start the Frontend
+
+Open another terminal:
+
+```powershell
+cd frontend
+
+npm install
+
+npm run dev
+```
+
+Frontend:
+
+```text
+http://localhost:5173
+```
+
+Build for production:
+
+```bash
+npm run build
+```
+
+## 🔌 Backend API Endpoints
+
+| Endpoint | Description |
+|---|---|
+| `/api/health` | Backend and database health check |
+| `/api/continents` | Available continent information |
+| `/api/overview` | Global analytics overview |
+| `/api/regions` | Regional trending information |
+| `/api/videos` | Trending video records |
+| `/api/categories` | Video category analytics |
+| `/api/insights` | Analytical insights with continent filtering |
+
+Example:
+
+```text
+/api/insights?continent=Asia
+```
+
+Interactive API documentation is available through FastAPI Swagger UI at `/docs`.
+
+## ☁️ Cloud Deployment
+
+The application is designed for separate frontend, backend, and database deployment.
+
+| Component | Deployment Platform |
+|---|---|
+| Frontend | Vercel |
+| Backend | Render |
+| PostgreSQL | Neon |
+| Source Code | GitHub |
+
+### Deployment Architecture
+
+```text
+             USERS
+               |
+               v
+         VERCEL HOSTING
+         React Dashboard
+               |
+               v
+         RENDER HOSTING
+          FastAPI Backend
+               |
+               v
+         NEON POSTGRESQL
+          Cloud Database
+```
+
+Environment variables are configured separately on the respective hosting platforms.
+
+## 🎯 Project Objectives
+
+- Build an end-to-end data engineering application.
+- Develop practical API integration workflows.
+- Implement a dimensional database model.
+- Expose analytical data through REST APIs.
+- Develop an interactive data visualization dashboard.
+- Explore global YouTube content trends through structured analytics.
+
+## 🔮 Future Enhancements
+
+- Automated ETL scheduling using Apache Airflow.
+- Historical trend and growth analysis.
+- Advanced regional content comparisons.
+- AI-powered content recommendations.
+- Predictive analysis of trending video categories.
+- Additional engagement and creator intelligence metrics.
+
+## 👨‍💻 Developer
 
 <div align="center">
 
 ### Mathan Ponraj
 
-**M.E. Computer Science | Python | Data Science | Data Engineering**
+**M.E. Computer Science | Python | Data Engineering | AI & Analytics**
 
-*Building practical data solutions through continuous learning and hands-on development.*
+Building practical data-driven applications through Python, database engineering, and intelligent analytics.
+
+<br/>
+
+<a href="https://www.linkedin.com/in/mathan03/">
+  <img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" />
+</a>
+
+<a href="https://github.com/mathan-ponraj">
+  <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" />
+</a>
+
+<a href="https://mathan-portfolio-ten.vercel.app/">
+  <img src="https://img.shields.io/badge/Portfolio-7C3AED?style=for-the-badge&logo=vercel&logoColor=white" />
+</a>
 
 </div>
 
@@ -344,7 +404,8 @@ psql -U postgres -d youtube_trending -f sql/schema.sql
 
 <div align="center">
 
-**From API extraction to analytics-ready data. Built with Python and PostgreSQL.**
+**Turning global video trends into actionable creator intelligence.**
+
+Built with Python, PostgreSQL, FastAPI and React.
 
 </div>
-
