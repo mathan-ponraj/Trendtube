@@ -37,7 +37,7 @@ DB_PORT = int(os.getenv("DB_PORT", "5432"))
 DB_NAME = os.getenv("DB_NAME", "youtube_trending")
 DB_USER = os.getenv("DB_USER", "postgres")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "")
-
+DATABASE_URL = os.getenv("DATABASE_URL", "")
 
 # Raw data directory
 RAW_DATA_DIR = BASE_DIR / "data" / "raw"
